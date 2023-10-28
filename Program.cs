@@ -14,19 +14,29 @@ namespace KNetReceiver
 
             Console.WriteLine("KNetReceiver ver 2.0");
 
-//            Helper.MqttConnectClient();
+            Helper.MqttConnectClient();
 
-            d.GetMysqlData();
+//            d.GetMysqlData();
 
             Console.WriteLine("Press enter to exit.");
-            Console.ReadLine();
+
+            while (true)
+            {
+                if (!Helper.MqttClientSub.IsConnected)
+                {
+                    Helper.MqttConnectClient();
+                }
+                Thread.Sleep(1000);
+            }
         }
+
+
 
 
         public static void MessageReceived(string Topic, string Payload)
         {
               // Skip KNet, is always KNet/.
-            Console.WriteLine(Topic + " ::: " + Payload);
+            Console.WriteLine(DateTime.Now.ToString() + " ::: " + Topic + " ::: " + Payload);
             string Tabel_name = Topic.Remove(0, 5).Replace('/', '_');  // Remove KNet and replace '/' with'_'
             d.WriteData(Tabel_name, Payload, DateTime.MinValue);
         }

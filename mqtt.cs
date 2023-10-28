@@ -12,7 +12,7 @@ namespace KNetReceiver
     {
         private static string MQTTIP = "192.168.1.22";
 
-        private static IMqttClient MqttClientSub;
+        public static IMqttClient MqttClientSub;
 
 
         public static async void MqttConnectClient()

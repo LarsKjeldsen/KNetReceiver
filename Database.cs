@@ -87,7 +87,12 @@ namespace KNetReceiver
                     }
                 }
                 else
-                    throw (e);
+                {
+                    if (command.Connection.State == System.Data.ConnectionState.Closed)
+                        connection.Open();
+
+                    Console.WriteLine(e.Message);
+                }
 
             }
         }
@@ -103,14 +108,14 @@ namespace KNetReceiver
 
         public void GetMysqlData()
         {
-            string query = "SELECT * FROM KNet.Data WHERE TIME > \"2023-10-22 16:10:00.000\"";
+            string query = "SELECT * FROM KNet.Data WHERE TIME > \"2023-10-26 22:00:00.000\"";
             string myConnectionString;
             DateTime t;
             bool first = true;
 
             List<mysqldata> data = new List<mysqldata>();
 
-            myConnectionString = "server=192.168.1.22;uid=kjeldsen;pwd=Minmore9876;database=KNet;Pooling=false";
+            myConnectionString = "server=192.168.1.25;uid=kjeldsen;pwd=Minmore9876;database=KNet;Pooling=false";
 
             using (MySqlConnection MySQLconnection = new MySqlConnection(myConnectionString))
             {
@@ -126,7 +131,7 @@ namespace KNetReceiver
                     {
                         t = (DateTime)reader.GetMySqlDateTime(0);
 
-                           for (int i = 1; i < reader.FieldCount; i++)
+                        for (int i = 1; i < reader.FieldCount; i++)
                         {
                             if (!reader.IsDBNull(i))
                             {
@@ -146,7 +151,9 @@ namespace KNetReceiver
                 Console.WriteLine("Records : " + data.Count);
                 foreach (mysqldata da in data)
                 {
-                    if (DateTime.UtcNow.Minute == 0) { Console.WriteLine(da.Time.ToString()); }
+                    if (DateTime.UtcNow.Second == 0)
+                        Console.WriteLine(da.Time.ToString());
+
                     WriteData(da.TabelName, da.Value, da.Time);
                 }
             }
