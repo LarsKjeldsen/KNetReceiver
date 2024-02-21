@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using MySqlConnector;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 
@@ -7,30 +8,26 @@ namespace KNetReceiver
 {
     internal class Database
     {
-
-        private SqlConnection connection;
-        private SqlCommand command;
-        private string connectionString;
-
-
-        public Database(string Server)
-        {
-            connectionString = "Persist Security Info=False;User ID=KNetReceiver;Password=KNetReceiver1234;Initial Catalog=KNet;Server=" + Server + ";Encrypt=False;";
-
-            connection = new SqlConnection(connectionString);
-
-            connection.Open();
-            Console.WriteLine("ServerVersion: {0}", connection.ServerVersion);
-            connection.ChangeDatabase("KNet");
-            Console.WriteLine("Database: {0}", connection.Database);
-
-            command = new SqlCommand("", connection);
-        }
-
+        private string connectionString = "Persist Security Info=False;User ID=KNetReceiver;Password=KNetReceiver1234;Initial Catalog=KNet;Server=192.168.1.4;Encrypt=False;";
+        private int prev_day = 0;
 
 
         public void WriteData(string Table_name, string value, DateTime time)
         {
+            if (time.Day != prev_day) 
+            { 
+                prev_day = time.Day;
+                Console.WriteLine(time);
+            }
+
+
+            SqlConnection connection = new SqlConnection(connectionString);
+
+            connection.Open();
+            connection.ChangeDatabase("KNet");
+
+            SqlCommand command = new SqlCommand("", connection);
+
             StringBuilder SQL = new StringBuilder();
 
             if (time == DateTime.MinValue)
@@ -95,6 +92,12 @@ namespace KNetReceiver
                 }
 
             }
+            finally
+            {
+                connection.Close();
+                connection.Dispose();
+                command.Dispose();
+            }
         }
 
         class mysqldata
@@ -108,14 +111,14 @@ namespace KNetReceiver
 
         public void GetMysqlData()
         {
-            string query = "SELECT * FROM KNet.Data WHERE TIME > \"2023-10-26 22:00:00.000\"";
+            string query = "SELECT * FROM KNet.Data WHERE TIME > \"2023-11-17 00:30:00.000\"";
             string myConnectionString;
             DateTime t;
             bool first = true;
 
             List<mysqldata> data = new List<mysqldata>();
 
-            myConnectionString = "server=192.168.1.25;uid=kjeldsen;pwd=Minmore9876;database=KNet;Pooling=false";
+            myConnectionString = "server=192.168.1.22;uid=kjeldsen;pwd=Minmore9876;database=KNet;Pooling=false";
 
             using (MySqlConnection MySQLconnection = new MySqlConnection(myConnectionString))
             {
@@ -149,19 +152,27 @@ namespace KNetReceiver
                     }
                 }
                 Console.WriteLine("Records : " + data.Count);
+                bool flag = true;
+                List<Task> tasks = new List<Task>();    
+
                 foreach (mysqldata da in data)
                 {
-                    if (DateTime.UtcNow.Second == 0)
-                        Console.WriteLine(da.Time.ToString());
-
-                    WriteData(da.TabelName, da.Value, da.Time);
+                 // WriteData(da.TabelName, da.Value, da.Time);
+                    tasks.Add(Task.Run(() => { WriteData(da.TabelName, da.Value, da.Time); }));
                 }
+                do
+                {
+                    long c = (tasks.Count(t => t.Status == TaskStatus.Running));
+                    long w = (tasks.Count(t => t.Status == TaskStatus.WaitingToRun));
+                    long r = (tasks.Count(t => t.Status == TaskStatus.RanToCompletion));
+
+                    Console.Write("\r" + c + ", " + w + ", " + r + "     ");
+                    Thread.Sleep(1000);
+                } while (true);
+
             }
 
         }
-
-
-
     }
 }
 

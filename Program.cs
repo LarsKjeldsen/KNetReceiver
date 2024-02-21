@@ -5,29 +5,28 @@ namespace KNetReceiver
 {
     class Program
     {
-        static string SQLSERVER = "192.168.1.24";
+        static string SQLSERVER = "solen";
         static Database d;
 
         static void Main(string[] args)
         {
-            d = new Database(SQLSERVER);
+            d = new Database();
 
             Console.WriteLine("KNetReceiver ver 2.0");
 
-            Helper.MqttConnectClient();
 
-//            d.GetMysqlData();
+//            Helper.MqttConnectClient();
+
+            d.GetMysqlData();
 
             Console.WriteLine("Press enter to exit.");
 
-            while (true)
-            {
-                if (!Helper.MqttClientSub.IsConnected)
-                {
-                    Helper.MqttConnectClient();
-                }
-                Thread.Sleep(1000);
-            }
+            //while (true)
+            //{
+            //    if (!Helper.MqttClientSub.IsConnected)
+            //        Helper.MqttConnectClient();
+            //    Thread.Sleep(1000);
+            //}
         }
 
 
