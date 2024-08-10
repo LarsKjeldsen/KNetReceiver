@@ -15,18 +15,18 @@ namespace KNetReceiver
             Console.WriteLine("KNetReceiver ver 2.0");
 
 
-//            Helper.MqttConnectClient();
+            Helper.MqttConnectClient();
 
             d.GetMysqlData();
 
             Console.WriteLine("Press enter to exit.");
 
-            //while (true)
-            //{
-            //    if (!Helper.MqttClientSub.IsConnected)
-            //        Helper.MqttConnectClient();
-            //    Thread.Sleep(1000);
-            //}
+            while (true)
+            {
+                if (!Helper.MqttClientSub.IsConnected)
+                    Helper.MqttConnectClient();
+                Thread.Sleep(1000);
+            }
         }
 
 

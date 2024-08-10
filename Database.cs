@@ -100,7 +100,7 @@ namespace KNetReceiver
             }
         }
 
-        class mysqldata
+        private class Mysqldata
         {
             public DateTime Time;
             public string Value;
@@ -111,12 +111,11 @@ namespace KNetReceiver
 
         public void GetMysqlData()
         {
-            string query = "SELECT * FROM KNet.Data WHERE TIME > \"2023-11-17 00:30:00.000\"";
+            string query = "SELECT * FROM KNet.Data WHERE TIME > \"2024-04-26 00:30:00.000\"";
             string myConnectionString;
             DateTime t;
-            bool first = true;
 
-            List<mysqldata> data = new List<mysqldata>();
+            List<Mysqldata> data = new List<Mysqldata>();
 
             myConnectionString = "server=192.168.1.22;uid=kjeldsen;pwd=Minmore9876;database=KNet;Pooling=false";
 
@@ -140,7 +139,7 @@ namespace KNetReceiver
                             {
                                 string v = reader[i].ToString().Replace(',', '.');
 
-                                mysqldata d = new mysqldata();
+                                Mysqldata d = new Mysqldata();
                                 d.Time = t;
                                 d.Value = v;
                                 d.TabelName = reader.GetName(i);
@@ -152,10 +151,9 @@ namespace KNetReceiver
                     }
                 }
                 Console.WriteLine("Records : " + data.Count);
-                bool flag = true;
                 List<Task> tasks = new List<Task>();    
 
-                foreach (mysqldata da in data)
+                foreach (Mysqldata da in data)
                 {
                  // WriteData(da.TabelName, da.Value, da.Time);
                     tasks.Add(Task.Run(() => { WriteData(da.TabelName, da.Value, da.Time); }));
