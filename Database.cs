@@ -8,7 +8,7 @@ namespace KNetReceiver
 {
     internal class Database
     {
-        private string connectionString = "Persist Security Info=False;User ID=KNetReceiver;Password=KNetReceiver1234;Initial Catalog=KNet;Server=192.168.1.4;Encrypt=False;";
+        private string connectionString = "Persist Security Info=False;User ID=KNetReceiver;Password=Minmore9876;Initial Catalog=KNet;Server=localhost;Encrypt=False;";
         private int prev_day = 0;
 
 
@@ -20,10 +20,18 @@ namespace KNetReceiver
                 Console.WriteLine(time);
             }
 
-
             SqlConnection connection = new SqlConnection(connectionString);
 
-            connection.Open();
+            try
+            {
+                connection.Open();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] Failed to open SQL connection: {ex.Message}");
+                return;
+            }
+
             connection.ChangeDatabase("KNet");
 
             SqlCommand command = new SqlCommand("", connection);
@@ -34,13 +42,13 @@ namespace KNetReceiver
             {
                 SQL.AppendFormat("DECLARE @DateNow datetime = Convert(datetime, FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm'))\n" +
                     "MERGE data as t\n" +
-                    "USING(VALUES(@DateNow)) as d(Time)\n" +
-                    "ON t.Time = @DateNow\n" +
+                    "USING(VALUES(@DateNow)) as d(TimeStamp)\n" +
+                    "ON t.TimeStamp = @DateNow\n" +
                     "WHEN MATCHED THEN\n" +
                         "UPDATE\n" +
                         "SET [{0}] = {1}\n" +
                     "WHEN NOT MATCHED THEN\n" +
-                        "INSERT(Time, [{0}])\n" +
+                        "INSERT(TimeStamp, [{0}])\n" +
                         "VALUES(@DateNow, {1}) ;", Table_name, value);
 
             }
@@ -48,13 +56,13 @@ namespace KNetReceiver
             { // CAST('2023-10-19 15:08:00' as datetime)
                 SQL.AppendFormat("DECLARE @DateNow DATETIME = CAST('" + time.ToString("yyyy-MM-dd HH:mm:00") + "' AS DATETIME)\n" +
                     "MERGE data as t\n" +
-                    "USING(VALUES(@DateNow)) as d(Time)\n" +
-                    "ON t.Time = @DateNow\n" +
+                    "USING(VALUES(@DateNow)) as d(TimeStamp)\n" +
+                    "ON t.TimeStamp = @DateNow\n" +
                     "WHEN MATCHED THEN\n" +
                         "UPDATE\n" +
                         "SET [{0}] = '{1}'\n" +
                     "WHEN NOT MATCHED THEN\n" +
-                        "INSERT(Time, [{0}])\n" +
+                        "INSERT(TimeStamp, [{0}])\n" +
                         "VALUES(@DateNow, '{1}') ;", Table_name, value);
             }
 
@@ -111,7 +119,7 @@ namespace KNetReceiver
 
         public void GetMysqlData()
         {
-            string query = "SELECT * FROM KNet.Data WHERE TIME > \"2024-04-26 00:30:00.000\"";
+            string query = "SELECT * FROM KNet.Data WHERE TIMEStamp > \"2024-04-26 00:30:00.000\"";
             string myConnectionString;
             DateTime t;
 

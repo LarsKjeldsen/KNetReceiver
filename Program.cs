@@ -5,7 +5,7 @@ namespace KNetReceiver
 {
     class Program
     {
-        static string SQLSERVER = "solen";
+        static string SQLSERVER = "localhost";
         static Database d;
 
         static void Main(string[] args)
@@ -17,9 +17,9 @@ namespace KNetReceiver
 
             Helper.MqttConnectClient();
 
-            d.GetMysqlData();
+//            d.GetMysqlData();
 
-            Console.WriteLine("Press enter to exit.");
+//            Console.WriteLine("Press enter to exit.");
 
             while (true)
             {
